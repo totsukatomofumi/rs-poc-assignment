@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package test;
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "Master.Protos.Client"; // To change
+
+// named w Grpc prefix, will be overridden anyways
+service GrpcTestRunner {
+    rpc RunTest(TestCase) returns (stream TestLog);
+
+    rpc GetTestResult(google.protobuf.Empty) returns (TestResult);
+    
+    // use mainly for polling on initial start up of server, else polling when sync w virtual is needed
+    rpc CheckTestStatus(google.protobuf.Empty) returns (TestStatus);
+}
+
+// can be used as is in message passing of the server
+message TestCase {
+    string name = 1;
+    int32 duration = 2;
+}
+
+message TestLog {
+    string message = 1;
+}
+
+message TestStatus {
+    bool isActive = 1;
+}
+
+message TestResult {
+    string message = 1;
+}

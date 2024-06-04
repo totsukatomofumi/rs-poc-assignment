@@ -1,0 +1,26 @@
+@Master_HostAddress = http://localhost:5240
+
+GET {{Master_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{Master_HostAddress}}/test/register
+Content-Type: application/json
+
+{
+  "address" : "value1"
+}
+
+###
+POST {{Master_HostAddress}}/test/run
+Content-Type: application/json
+
+{
+        "testRunnerIndex" : 1,
+        "connectionId" : "",
+        "testCase" : {
+          "Name" : "Test3",
+          "Duration" : 10
+        }
+}
