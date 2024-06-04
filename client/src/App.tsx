@@ -15,9 +15,12 @@ function App() {
     .withUrl(upstreamAddr + hubPath)
     .build();
 
-  hubConnection.start().then(() => {
-    console.log(`Connection with ${upstreamAddr} success!`)
-  });
+  useEffect(() => {
+    console.log("hello");
+    hubConnection.start().then(() => {
+      console.log(`Connection with ${upstreamAddr} success!`)
+    });
+  }, []);
 
   return <Dashboard upstreamAddr={upstreamAddr} hubConnection={hubConnection} />;
 }
