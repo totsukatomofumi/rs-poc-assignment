@@ -1,4 +1,3 @@
-import { HubConnection } from '@microsoft/signalr';
 import { SyntheticEvent, useState } from 'react';
 
 import Button from 'react-bootstrap/Button';
