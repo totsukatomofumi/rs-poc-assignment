@@ -12,5 +12,14 @@ public interface IDashboardClient
 }
 public class DashboardHub : Hub<IDashboardClient>
 {
+    TestRunnerManager _testRunnerManager;
+    public DashboardHub(TestRunnerManager testRunnerManager)
+    {
+        _testRunnerManager = testRunnerManager;
+    }
 
+    public override async Task OnConnectedAsync()
+    {
+        await Clients.Client(Context.ConnectionId).PushTestRunnerList(_testRunnerManager.testRunners);
+    }
 }

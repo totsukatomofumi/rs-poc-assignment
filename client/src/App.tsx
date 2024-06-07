@@ -16,8 +16,21 @@ function App() {
     .build();
 
   useEffect(() => {
-    hubConnection.start().then(() => {
-      console.log(`Connection with ${upstreamAddr} success!`);
+    async function start() {
+      try {
+        await hubConnection.start();
+        console.log(`Connection with ${upstreamAddr} success!`);
+      } catch (err) {
+        console.log(err);
+        setTimeout(start, 1000);
+      }
+    }
+
+    start();
+
+    hubConnection.onclose((err) => {
+      console.log(err);
+      start();
     });
   }, []);
 

@@ -11,6 +11,7 @@ import ServiceConsole from "../components/Console/ServiceConsole";
 import { useAppDispatch, useAppSelector } from "./hooks";
 import { addLog, resetLogs } from "../components/Console/consoleSlice";
 import {
+  resetList,
   setServices,
   addActiveService,
   removeActiveService,
@@ -103,6 +104,10 @@ function Dashboard({
     hubConnection.on("PushTestLog", handlePushServiceLog);
 
     hubConnection.on("PushTestRunnerList", handlePushServiceList);
+
+    hubConnection.onclose((err) => {
+      dispatch(resetList());
+    });
   }, []);
 
   return (

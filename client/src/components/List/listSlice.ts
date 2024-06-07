@@ -15,6 +15,10 @@ const listSlice = createSlice({
   name: "list",
   initialState,
   reducers: {
+    resetList: (state) => {
+      state.services = new Array<TestRunner>();
+      state.activeServices = new Array<TestRunner>();
+    },
     setServices: (state, action: PayloadAction<Array<TestRunner>>) => {
       state.services = action.payload;
     },
@@ -29,7 +33,7 @@ const listSlice = createSlice({
   },
 });
 
-export const { setServices, addActiveService, removeActiveService } =
+export const { resetList, setServices, addActiveService, removeActiveService } =
   listSlice.actions;
 
 export default listSlice.reducer;
