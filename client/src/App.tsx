@@ -16,7 +16,6 @@ function App() {
     .build();
 
   useEffect(() => {
-    console.log("hello");
     hubConnection.start().then(() => {
       console.log(`Connection with ${upstreamAddr} success!`);
     });

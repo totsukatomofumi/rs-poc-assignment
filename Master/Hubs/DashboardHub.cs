@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.SignalR;
 using Master.Protos.Client;
+using Master.Models;
 
 namespace Master.Hubs;
 
 public interface IDashboardClient
 {
-    Task RegisterTestRunner(string address, bool isActive);
-    Task UpdateActivity(int index, bool isActive);
+    Task PushTestRunnerList(List<TestRunner> testRunners);
     Task PushTestLog(TestLog testLog);
 
 }

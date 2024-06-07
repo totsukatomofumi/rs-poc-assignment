@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -10,30 +10,33 @@ import ServiceList from "../components/List/ServiceList";
 import ServiceConsole from "../components/Console/ServiceConsole";
 import { useAppDispatch, useAppSelector } from "./hooks";
 import { addLog, resetLogs } from "../components/Console/consoleSlice";
-import { addService, setService } from "../components/List/listSlice";
+import {
+  setServices,
+  addActiveService,
+  removeActiveService,
+} from "../components/List/listSlice";
 
-export interface IService {
-  index: number;
+export interface TestRunner {
   address: string;
   isActive: boolean;
 }
 
-export interface ITestCase {
+export interface TestCase {
   name: string;
   duration: number;
 }
 
-export interface ITestRequest {
-  testRunnerIndex: number;
+export interface TestRequest {
   connectionId: string | null;
-  testCase: ITestCase;
+  testRunner: TestRunner;
+  testCase: TestCase;
 }
 
-export interface ITestLog {
+export interface TestLog {
   message: string;
 }
 
-export interface ITestResult {
+export interface TestResult {
   message: string;
 }
 
@@ -48,44 +51,26 @@ function Dashboard({
 }) {
   // all hooks should be here for ease of access
   // hook state only for rendering, view-only
-  const services = useAppSelector((state) => state.list.services);
-  const logs = useAppSelector((state) => state.console.logs);
+  const activeServices = useAppSelector((state) => state.list.activeServices);
   const dispatch = useAppDispatch();
 
   // handlers
-  function handleRegisterService(address: string, isActive: boolean) {
-    // TODO: Fetch entire array of services from backend
-    dispatch(
-      addService({
-        index: 0,
-        address: address,
-        isActive: isActive,
-      })
-    );
-  }
-
-  function handleUpdateServiceActivity(index: number, isActive: boolean) {
-    dispatch(
-      setService({
-        index,
-        address: "",
-        isActive,
-      })
-    );
-  }
-
-  function handlePushServiceLog(testLog: ITestLog) {
+  function handlePushServiceLog(testLog: TestLog) {
     dispatch(addLog(testLog));
   }
 
-  async function handleRunService(service: IService, testCase: ITestCase) {
-    // reset console
-    dispatch(resetLogs());
+  async function handleRunService(service: TestRunner, testCase: TestCase) {
+    dispatch(addActiveService(service));
+
+    // reset console if no active services
+    if (activeServices.length === 0) {
+      dispatch(resetLogs());
+    }
 
     // prepare testRequest
-    const testRequest: ITestRequest = {
-      testRunnerIndex: service.index,
+    const testRequest: TestRequest = {
       connectionId: hubConnection.connectionId,
+      testRunner: service,
       testCase: testCase,
     };
 
@@ -102,18 +87,22 @@ function Dashboard({
       alert(`${response.status}  ${response.statusText}`);
       return;
     }
-    const testResult: ITestResult = await response.json();
+    const testResult: TestResult = await response.json();
+
+    dispatch(removeActiveService(service));
 
     alert(testResult.message);
   }
 
+  function handlePushServiceList(services: Array<TestRunner>) {
+    dispatch(setServices(services));
+  }
+
   // register
   useEffect(() => {
-    hubConnection.on("RegisterTestRunner", handleRegisterService);
-
-    hubConnection.on("UpdateActivity", handleUpdateServiceActivity);
-
     hubConnection.on("PushTestLog", handlePushServiceLog);
+
+    hubConnection.on("PushTestRunnerList", handlePushServiceList);
   }, []);
 
   return (
@@ -128,13 +117,10 @@ function Dashboard({
     >
       <Row className="gx-3">
         <Col xs={3}>
-          <ServiceList
-            services={services}
-            handleRunService={handleRunService}
-          />
+          <ServiceList handleRunService={handleRunService} />
         </Col>
         <Col>
-          <ServiceConsole logs={logs} />
+          <ServiceConsole />
         </Col>
       </Row>
     </Container>

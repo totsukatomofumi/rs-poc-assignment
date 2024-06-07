@@ -19,10 +19,13 @@ public class TestController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task RegisterTestRunner(TestRunner testRunner)
+    public async Task<ActionResult> RegisterTestRunner(TestRunner testRunner)
     {
         // initialise test runner given
         await testRunner.Init();
+
+        // poll for activity, handshaking
+        testRunner.isActive = (await testRunner.grpcClient.CheckTestStatusAsync(new Empty())).IsActive;
 
         // add to testrunner manager
         _testRunnerManager.testRunners.Add(testRunner);
@@ -30,21 +33,26 @@ public class TestController : ControllerBase
         Console.WriteLine($"Registered {testRunner.address}");
 
         // update front end dashboards using signalR
-        _hubContext.Clients.All.RegisterTestRunner(testRunner.address, testRunner.isActive);
+        await _hubContext.Clients.All.PushTestRunnerList(_testRunnerManager.testRunners);
 
+        return Ok();
     }
 
-    public class TestRequest
+    [HttpPost("deregister")]
+    public async Task DeregisterTestRunner(TestRunner testRunner)
     {
-        public int testRunnerIndex { get; set; }
-        public string connectionId { get; set; }
-        public TestCase testCase { get; set; }
+
     }
 
     [HttpPost("run")]
     public async Task<ActionResult<TestResult>> RunTest([FromBody] TestRequest testRequest)
     {
-        TestRunner testRunner = _testRunnerManager.testRunners[testRequest.testRunnerIndex];
+        TestRunner testRunner = _testRunnerManager.testRunners.Find(t => t.address == testRequest.testRunner.address);
+
+        if (testRunner == null)
+        {
+            return NotFound();
+        }
 
         // check local 
         if (testRunner.isActive)
@@ -59,7 +67,7 @@ public class TestController : ControllerBase
             testRunner.isActive = true;
 
             // reflect this display on dashboards
-            await _hubContext.Clients.AllExcept(testRequest.connectionId).UpdateActivity(testRequest.testRunnerIndex, testRunner.isActive);
+            await _hubContext.Clients.All.PushTestRunnerList(_testRunnerManager.testRunners);
 
             // run the test 
             // TODO: grpc accept the stream
@@ -82,7 +90,7 @@ public class TestController : ControllerBase
             testRunner.isActive = false;
 
             // reflect this display on dashboards
-            await _hubContext.Clients.AllExcept(testRequest.connectionId).UpdateActivity(testRequest.testRunnerIndex, testRunner.isActive);
+            await _hubContext.Clients.All.PushTestRunnerList(_testRunnerManager.testRunners);
 
             // return result
             return Ok(testResult);
