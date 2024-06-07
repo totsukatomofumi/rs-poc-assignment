@@ -83,13 +83,13 @@ function Dashboard({
       body: JSON.stringify(testRequest),
     });
 
+    dispatch(removeActiveService(service));
+
     if (!response.ok) {
       alert(`${response.status}  ${response.statusText}`);
       return;
     }
     const testResult: TestResult = await response.json();
-
-    dispatch(removeActiveService(service));
 
     alert(testResult.message);
   }

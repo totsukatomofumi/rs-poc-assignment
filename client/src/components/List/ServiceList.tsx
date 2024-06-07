@@ -25,7 +25,11 @@ function ServiceList({
       <Card.Header>Test Runners</Card.Header>
       <Accordion style={{ height: "calc(100vh - 20px)", overflow: "auto" }}>
         {services.map((s) => (
-          <Service service={s} handleRunService={handleRunService} />
+          <Service
+            key={s.address}
+            service={s}
+            handleRunService={handleRunService}
+          />
         ))}
       </Accordion>
       <Card.Footer></Card.Footer>
