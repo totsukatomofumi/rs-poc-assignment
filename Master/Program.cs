@@ -1,5 +1,7 @@
 using Master.Models;
 using Master.Hubs;
+using Master.Config;
+using Master.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,16 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
+
+builder.Services.Configure<ConsulConfig>(builder.Configuration.GetSection("ConsulConfig"));
+builder.Services.AddHttpClient("Consul", httpClient =>
+{
+    httpClient.BaseAddress = new Uri(builder.Configuration["ConsulConfig:ConsulAddress"]);
+
+});
+
+builder.Services.AddHostedService<ConsulHostedService>();
+
 
 var app = builder.Build();
 

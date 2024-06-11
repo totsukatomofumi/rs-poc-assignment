@@ -26,7 +26,7 @@ public class TestRunner
 
 public class TestRunnerManager
 {
-    public List<TestRunner> testRunners { get; } = new List<TestRunner>();
+    public List<TestRunner> testRunners { get; set; } = new List<TestRunner>();
 }
 
 public class TestRequest
