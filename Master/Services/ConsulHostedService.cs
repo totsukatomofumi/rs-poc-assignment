@@ -77,6 +77,7 @@ public class ConsulHostedService : IHostedService
       {
         await testRunner.Init();
         testRunner.isActive = (await testRunner.grpcClient.CheckTestStatusAsync(new Empty())).IsActive;
+        Console.WriteLine(testRunner.isActive);
       }
 
       // assign

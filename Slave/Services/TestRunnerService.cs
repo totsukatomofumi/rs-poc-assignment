@@ -7,7 +7,7 @@ namespace Slave.Services;
 
 public class TestRunnerService : GrpcTestRunner.GrpcTestRunnerBase
 {
-    private TestStatus _testStatus = new TestStatus { IsActive = false };
+    private static TestStatus _testStatus = new TestStatus { IsActive = false };
     private static TestResult? _testResult;
 
     public override async Task RunTest(TestCase testCase, IServerStreamWriter<TestLog> testLogStream, ServerCallContext context)
